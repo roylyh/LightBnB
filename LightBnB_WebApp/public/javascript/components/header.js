@@ -93,9 +93,4 @@ $(() => {
     views_manager.show('newProperty');
   });
 
-  // test
-  $("header").on('click', '.res_button', () => {
-    views_manager.show('res');
-  });
-
 });
