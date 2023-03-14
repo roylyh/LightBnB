@@ -1,16 +1,17 @@
 const properties = require("./json/properties.json");
 const users = require("./json/users.json");
+const db = require("./db");
 
 // connect to database
-const { Pool } = require("pg");
-const { json } = require("body-parser");
+// const { Pool } = require("pg");
+// const { json } = require("body-parser");
 
-const pool = new Pool({
-  user: "labber",
-  password: "labber",
-  host: "localhost",
-  database: "lightbnb",
-});
+// const pool = new Pool({
+//   user: "labber",
+//   password: "labber",
+//   host: "localhost",
+//   database: "lightbnb",
+// });
 
 /// Users
 
@@ -19,15 +20,25 @@ const pool = new Pool({
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
+// const getUserWithEmail = function(email) {
+//   return pool
+//     .query(`SELECT * FROM users WHERE email = $1;`, [email])
+//     .then((res) => {
+//       return res.rows[0];
+//     })
+//     .catch((err) => {
+//       console.log(err.message);
+//     });
+// };
+// exports.getUserWithEmail = getUserWithEmail;
+
 const getUserWithEmail = function(email) {
-  return pool
-    .query(`SELECT * FROM users WHERE email = $1;`, [email])
-    .then((res) => {
-      return res.rows[0];
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+  return db.query(`SELECT * FROM users WHERE email = $1;`, [email], (res) => {
+    return res.rows[0];
+  }
+  ).catch((err) => {
+    console.log(err.message);
+  });
 };
 exports.getUserWithEmail = getUserWithEmail;
 
@@ -37,14 +48,19 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return pool
-    .query(`SELECT * FROM users WHERE id = $1;`, [id])
-    .then((res) => {
-      return res.rows[0];
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+  // return pool
+  //   .query(`SELECT * FROM users WHERE id = $1;`, [id])
+  //   .then((res) => {
+  //     return res.rows[0];
+  //   })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   });
+  return db.query(`SELECT * FROM users WHERE id = $1;`, [id], (res) => {
+    return res.rows[0];
+  }).catch((err) => {
+    console.log(err.message);
+  });
 };
 exports.getUserWithId = getUserWithId;
 
@@ -54,17 +70,23 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser = function(user) {
-  return pool
-    .query(
-      `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`,
-      [user.name, user.email, user.password]
-    )
-    .then((res) => {
+  // return pool
+  //   .query(
+  //     `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`,
+  //     [user.name, user.email, user.password]
+  //   )
+  //   .then((res) => {
+  //     return res.rows[0];
+  //   })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   });
+  return db.query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`,
+    [user.name, user.email, user.password], (res) => {
       return res.rows[0];
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+    }).catch((err) => {
+    console.log(err.message);
+  });
 };
 exports.addUser = addUser;
 
@@ -76,20 +98,34 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return pool.query(`SELECT properties.*
+  // return pool.query(`SELECT properties.*
+  // FROM reservations
+  // JOIN properties ON reservations.property_id = properties.id
+  // JOIN property_reviews ON properties.id = property_reviews.property_id
+  // WHERE reservations.guest_id = $1
+  // GROUP BY properties.id, reservations.id
+  // ORDER BY reservations.start_date
+  // LIMIT $2;`,[guest_id,limit]).then((res) => {
+  //   return res.rows;
+  // }
+  // ).catch((err) => {
+  //   console.log(err.message);
+  // }
+  // );
+
+  return db.query(`SELECT properties.*
   FROM reservations
   JOIN properties ON reservations.property_id = properties.id
   JOIN property_reviews ON properties.id = property_reviews.property_id
   WHERE reservations.guest_id = $1
   GROUP BY properties.id, reservations.id
   ORDER BY reservations.start_date
-  LIMIT $2;`,[guest_id,limit]).then((res) => {
+  LIMIT $2;`,
+  [guest_id,limit], (res) => {
     return res.rows;
-  }
-  ).catch((err) => {
+  }).catch((err) => {
     console.log(err.message);
-  }
-  );
+  });
 };
 exports.getAllReservations = getAllReservations;
 
@@ -147,11 +183,17 @@ const getAllProperties = function(options, limit = 10) {
   LIMIT $${queryParams.length};
   `;
 
-  // console.log(queryString, queryParams);
+  console.log(queryString, queryParams);
 
-  return pool.query(queryString, queryParams).then((res) => res.rows).catch((err) => {
+  // return pool.query(queryString, queryParams).then((res) => res.rows).catch((err) => {
+  //   console.log(err.message);
+  // });
+  return db.query(queryString, queryParams, (res) => {
+    return res.rows;
+  }).catch((err) => {
     console.log(err.message);
   });
+
 };
 exports.getAllProperties = getAllProperties;
 
@@ -170,7 +212,13 @@ const addProperty = function(property) {
 
   console.log(queryString, queryParams);
 
-  return pool.query(queryString, queryParams).then((res) => res.rows[0]).catch((err) => {
+  // return pool.query(queryString, queryParams).then((res) => res.rows[0]).catch((err) => {
+  //   console.log(err.message);
+  // });
+
+  return db.query(queryString, queryParams, (res) => {
+    return res.rows[0];
+  }).catch((err) => {
     console.log(err.message);
   });
 
@@ -193,7 +241,13 @@ const makeReservation = function(reservation) {
 
   console.log(queryString, queryParams);
 
-  return pool.query(queryString, queryParams).then((res) => res.rows[0]).catch((err) => {
+  // return pool.query(queryString, queryParams).then((res) => res.rows[0]).catch((err) => {
+  //   console.log(err.message);
+  // });
+
+  return db.query(queryString, queryParams, (res) => {
+    return res.rows[0];
+  }).catch((err) => {
     console.log(err.message);
   });
 

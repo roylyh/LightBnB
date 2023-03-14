@@ -16,7 +16,6 @@ $(() => {
           <li class="search_button">Search</li>
           <li class="login_button">Log In</li>
           <li class="sign-up_button">Sign Up</li>
-          <li class="res_button">resrve</li>
         </ul>
       </nav>
       `;
@@ -87,10 +86,6 @@ $(() => {
     logOut().then(() => {
       header.update(null);
     });
-  });
-
-  $('header').on('click', '.create_listing_button', function() {
-    views_manager.show('newProperty');
   });
 
 });
