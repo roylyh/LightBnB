@@ -9,7 +9,7 @@ function logOut() {
   return $.ajax({
     method: "POST",
     url: "/users/logout",
-  })
+  });
 }
 
 function logIn(data) {
@@ -50,5 +50,13 @@ const submitProperty = function(data) {
     method: "POST",
     url: "/api/properties",
     data,
+  });
+};
+
+function submitReservation(data) {
+  return $.ajax({
+    method: "POST",
+    url: "/api/reservation",
+    data
   });
 }

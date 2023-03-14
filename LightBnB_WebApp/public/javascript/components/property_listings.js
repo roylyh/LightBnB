@@ -27,4 +27,9 @@ $(() => {
   }
   window.propertyListings.addProperties = addProperties;
 
+  $propertyListings.on('click', '.reservationButton', function(event) {
+    console.log($(this).attr('proid'));
+    views_manager.show('res', $(this).attr('proid'));
+  });
+
 });
